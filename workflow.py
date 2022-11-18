@@ -34,4 +34,7 @@ def clean_data(data, replace_nan="mean"):
     # Normalizing data
     data = (data - data.mean()) / data.std()
 
+    # Shuffling data
+    data = data.sample(frac=1).reset_index(drop=True)
+
     return data
