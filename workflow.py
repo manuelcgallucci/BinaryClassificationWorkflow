@@ -1,3 +1,6 @@
+from pstats import Stats
+import numpy as np
+import pandas as pd
 
 
 def import_data(csv_path, col_names, normalize="std", dummy_cols=None, replace_nan="mean"):
@@ -12,3 +15,23 @@ def import_data(csv_path, col_names, normalize="std", dummy_cols=None, replace_n
 
     return data
 
+
+def clean_data(data, replace_nan="mean"):
+    """
+    data: data to be cleaned
+    replace_nan: Way to replace nan or missing values. ("mean", "median", "remove")
+    """
+    if replace_nan == "mean":
+        data = data.fillna(data.mean())
+    elif replace_nan == "median":  
+        data = data.fillna(data.median())
+    elif replace_nan == "remove":
+        data = data.dropna()
+
+    # Removing rows with outliers
+    data = data[(np.abs(Stats.zscore(data)) < 3).all(axis=1)]
+
+    # Normalizing data
+    data = (data - data.mean()) / data.std()
+
+    return data
