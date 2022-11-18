@@ -3,7 +3,7 @@ from pstats import Stats
 import numpy as np
 import pandas as pd
 
-def import_data(csv_path, col_names, normalize="std", class_label="last", dummy_cols=None, replace_nan="mean"):
+def import_data(csv_path, col_names, true_label_str=np.Nan,normalize="std", class_label="last", dummy_cols=None, replace_nan="mean"):
     """
     INPUT:
     -   csv_path: path to the data in csv format
@@ -28,18 +28,22 @@ def import_data(csv_path, col_names, normalize="std", class_label="last", dummy_
     y = data[label_to_drop].values
 
     # Remove empty labels
-
+    for i in range(np.size(y)):
+        if (y[i]=="" or y[i]==" " or y[i]=='?' or y[i]==np.Nan):
+            y = np.delete(y,i)
+            X = np.delete(X,i, axis=0)
 
     # Turn labels to integers 0 or 1, supposing every label has a valid value and of the same dtype
     if isinstance(y[0], str):
-        y = pd.get_dummies(y, drop_first=True)
-    else if isinstance(y[0],int):
-
-    else if isinstance(y[0],bool):
-
-
-
-    labels = data.drop()
+        if true_label_str != np.Nan:
+            y = (y==true_label_str).astype(int)
+        else:
+            y = (y==y[0]).astype(int)
+    elif isinstance(y[0],int):
+        for i in range(np.size(y)):
+            assert (y[i] == 1 or y[i] == 0), 'Label values are not 0 or 1'
+    elif isinstance(y[0],bool):
+        y = y.astype(int)
 
 
 
