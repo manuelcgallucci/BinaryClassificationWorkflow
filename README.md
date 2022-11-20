@@ -3,10 +3,10 @@ Implementation of a Binary Classification Workflow using scikit learn for data w
 
 ## Workflow
 
-Data cleaning (missing values / NaN)
-Data normalizing 
-Model training (with cross validation)
-Model test set with plotted results
+- Data cleaning (missing values / NaN)
+- Data normalizing 
+- Model training (with cross validation)
+- Run model through a test set and plot the results
 
 ## Datasets used:
 Chronic Kidney Disease Dataset: https://www.kaggle.com/datasets/mansoordaku/ckdisease
