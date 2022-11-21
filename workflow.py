@@ -11,6 +11,29 @@ from sklearn.base import clone
 import seaborn as sns
 import os 
 
+# Auxiliar function
+def clean_data(data, replace_nan="mean"):
+    """
+    data: data to be cleaned
+    replace_nan: Way to replace nan or missing values. ("mean", "median", "remove")
+    """
+    if replace_nan == "mean":
+        data = data.fillna(data.mean())
+    elif replace_nan == "median":  
+        data = data.fillna(data.median())
+    elif replace_nan == "remove":
+        data = data.dropna()
+
+    # Removing rows with outliers
+    data = data[(np.abs(Stats.zscore(data)) < 3).all(axis=1)]
+
+    # Normalizing data
+    data = (data - data.mean()) / data.std()
+
+    # Shuffling data
+    data = data.sample(frac=1).reset_index(drop=True)
+
+    return data
 
 def import_data(csv_path, col_names, true_label_str=(np.Nan,np.Nan),normalize="std", class_label="last", dummy_cols=None, replace_nan="mean"):
     """
@@ -23,34 +46,9 @@ def import_data(csv_path, col_names, true_label_str=(np.Nan,np.Nan),normalize="s
     -   replace_nan: Way to replace nan or missing values. ("mean", "median", "remove")
 
     OUTPUT: 
-    -   X: DataFrame of size (n_samples x n_features) with column names included.
+    -   data: DataFrame of size (n_samples x n_features) with column names included.
     -   y: DataFrame of size (n_samples x 1) that represents the labels
     """
-
-    # Auxiliar function
-    def clean_data(data, replace_nan="mean"):
-        """
-        data: data to be cleaned
-        replace_nan: Way to replace nan or missing values. ("mean", "median", "remove")
-        """
-        if replace_nan == "mean":
-            data = data.fillna(data.mean())
-        elif replace_nan == "median":  
-            data = data.fillna(data.median())
-        elif replace_nan == "remove":
-            data = data.dropna()
-
-        # Removing rows with outliers
-        data = data[(np.abs(Stats.zscore(data)) < 3).all(axis=1)]
-
-        # Normalizing data
-        data = (data - data.mean()) / data.std()
-
-        # Shuffling data
-        data = data.sample(frac=1).reset_index(drop=True)
-
-        return data
-
 
     # Read data
     data = pd.read_csv(csv_path)
@@ -100,7 +98,7 @@ def import_data(csv_path, col_names, true_label_str=(np.Nan,np.Nan),normalize="s
     # Call to function clean_data
     clean_data(X, replace_nan=replace_nan)
 
-    return data
+    return data, y
 
 def train_model(model, data, labels, test_size, random_state=42, plot_results=None, cross_validation=None):
     """
