@@ -1,12 +1,13 @@
-
+import workflow as wf
+from sklearn.ensemble import RandomForestClassifier
 
 def main():
     
     BankNotes = {
         "data_path": ,
         "ftr_names": ,
-        "out_path": ,
-        "model": ,
+        "out_path": "./",
+        "model": RandomForestClassifier(n_estimators=10, max_depth=6),
         "cross_validation": 5,
         "test_size": 0.3,
         "true_label": ( , ),
@@ -27,8 +28,9 @@ def main():
 
     for work in workflow:
 
-        import_data(work["data_path"], work["ftr_names"], true_label_str=(np.Nan,np.Nan),normalize="std", class_label="last", dummy_cols=None, replace_nan="mean")
+        data, labels = wf.import_data(work["data_path"], work["ftr_names"], true_label_str=work["true_label"], dummy_cols=None)
+        
 
-
+        break
 if __name__ == "__main__":
     main()
