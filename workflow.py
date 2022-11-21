@@ -24,8 +24,8 @@ def clean_data(data, replace_nan="mean"):
     elif replace_nan == "remove":
         data = data.dropna()
 
-    # Removing rows with outliers
-    data = data[(np.abs(Stats.zscore(data)) < 3).all(axis=1)]
+    # Removing rows with outliers TODO
+    # data = data[(np.abs(Stats.zscore(data)) < 3).all(axis=1)]
 
     # Normalizing data
     data = (data - data.mean()) / data.std()
@@ -35,7 +35,7 @@ def clean_data(data, replace_nan="mean"):
 
     return data
 
-def import_data(csv_path, col_names, true_label_str=(np.Nan,np.Nan),normalize="std", class_label="last", dummy_cols=None, replace_nan="mean"):
+def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_label="last", dummy_cols=None, replace_nan="mean"):
     """
     INPUT:
     -   csv_path: path to the data in csv format
@@ -49,6 +49,8 @@ def import_data(csv_path, col_names, true_label_str=(np.Nan,np.Nan),normalize="s
     -   data: DataFrame of size (n_samples x n_features) with column names included.
     -   y: DataFrame of size (n_samples x 1) that represents the labels
     """
+    if true_label_str is None:
+        true_label_str=(np.nan,np.nan)
 
     # Read data
     data = pd.read_csv(csv_path)
@@ -64,7 +66,7 @@ def import_data(csv_path, col_names, true_label_str=(np.Nan,np.Nan),normalize="s
     # Remove empty labels
     rows_to_delete = []
     for i in range(np.size(y)):
-        if (y[i]=="" or y[i]==" " or y[i]=='?' or y[i]==np.Nan):
+        if (y[i]=="" or y[i]==" " or y[i]=='?' or y[i]==np.nan):
             rows_to_delete.append(i)
     for a in rows_to_delete:
         y = np.delete(y,a)
@@ -73,7 +75,7 @@ def import_data(csv_path, col_names, true_label_str=(np.Nan,np.Nan),normalize="s
     # Turn labels to integers 0 or 1, supposing every label has a valid value and of the same dtype
     rows_to_delete = []
     if isinstance(y[0], str):
-        if true_label_str != (np.Nan,np.Nan):
+        if true_label_str != (np.nan,np.nan):
             for i in range(np.size(y)):
                 if y[i]==true_label_str[0]:
                     # if value is true
@@ -94,11 +96,11 @@ def import_data(csv_path, col_names, true_label_str=(np.Nan,np.Nan),normalize="s
     elif isinstance(y[0],bool):
         y = y.astype(int)
 
-
+    X = pd.DataFrame(X)
     # Call to function clean_data
     clean_data(X, replace_nan=replace_nan)
 
-    return data, y
+    return X, y
 
 def train_model(model, data, labels, test_size, random_state=42, plot_results=None, cross_validation=None):
     """
@@ -113,7 +115,7 @@ def train_model(model, data, labels, test_size, random_state=42, plot_results=No
     returns the accuracy, precision and recall of the model as a tuple and the confusion matrix
     IF cross validation is used, then these are return in the form of lists
     """
-
+    print("cross_validation", cross_validation)
     if cross_validation is None:
         X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=test_size, random_state=random_state)
         
@@ -127,9 +129,11 @@ def train_model(model, data, labels, test_size, random_state=42, plot_results=No
         cf_matrix = confusion_matrix(y_pred, y_test)
 
         if plot_results is not None:    
-            if os.path.exists(os.path.join(plot_results, "results")):
+            if not os.path.exists(plot_results):
+                os.mkdir(plot_results)
+            if not os.path.exists(os.path.join(plot_results, "results")):
                 os.mkdir(os.path.join(plot_results, "results"))
-            ax = sns.heatmap(cf_matrix, annot=True)
+            ax = sns.heatmap(cf_matrix, annot=True,cmap='Blues', fmt='g')
             ax.set_title('Confusion Matrix')
             ax.set_ylabel('True values')
             ax.set_xlabel('Predicted values')
@@ -147,10 +151,10 @@ def train_model(model, data, labels, test_size, random_state=42, plot_results=No
         for train_index, test_index in cross_val.split(data):
             # Copy the model so it can be trained from 0 each time
             model_ = clone(model)
-            X_train, X_test, y_train, y_test = data[train_index], data[test_index], labels[train_index], labels[test_index]
+            X_train, X_test, y_train, y_test = data.iloc[train_index], data.iloc[test_index], labels[train_index], labels[test_index]
             # Fit and predict the model
             model_.fit(X_train, y_train)
-            y_pred = model.predict(X_test)
+            y_pred = model_.predict(X_test)
             # Save the parameters of the cross validation
             accuracy.append(accuracy_score(y_pred, y_test))
             precision.append(precision_score(y_pred, y_test))
@@ -158,10 +162,12 @@ def train_model(model, data, labels, test_size, random_state=42, plot_results=No
             cf_matrix.append(confusion_matrix(y_pred, y_test))
 
         if plot_results is not None:    
-            if os.path.exists(os.path.join(plot_results, "results_crval")):
+            if not os.path.exists(plot_results):
+                os.mkdir(plot_results)
+            if not os.path.exists(os.path.join(plot_results, "results_crval")):
                 os.mkdir(os.path.join(plot_results, "results_crval"))
             # Plot the mean confusion matrix
-            ax = sns.heatmap(np.mean(np.array(cf_matrix), axis=0), annot=True)
+            ax = sns.heatmap(np.mean(np.array(cf_matrix), axis=0), annot=True,cmap='Blues', fmt='g')
             ax.set_title('Mean Confusion Matrix')
             ax.set_ylabel('True values')
             ax.set_xlabel('Predicted values')
@@ -170,6 +176,7 @@ def train_model(model, data, labels, test_size, random_state=42, plot_results=No
 
             # Plot the metric comparison
             raw_data = {"accuracy":accuracy, "precision":precision, "recall":recall}
+            print(raw_data)
             ax = sns.barplot(data=raw_data) # TODO 
             ax.set_title('Metrics comparison')
             ax.set_ylabel('Metric')
