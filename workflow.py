@@ -8,7 +8,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
 from sklearn.model_selection import ShuffleSplit
 from sklearn.base import clone
+
 import seaborn as sns
+import matplotlib.pyplot as plt
+
 import os 
 
 # Auxiliar function
@@ -174,22 +177,35 @@ def train_model(model, data, labels, test_size, random_state=42, plot_results=No
             fig = ax.get_figure()
             fig.savefig(os.path.join(plot_results, "results_crval", "confusion_matrix.png"))
 
+            plt.figure()
+            x_axis = np.linspace(0, cross_validation, cross_validation, endpoint=False)
             # Plot the metric comparison
-            raw_data = {"accuracy":accuracy, "precision":precision, "recall":recall}
-            print(raw_data)
-            ax = sns.barplot(data=raw_data) # TODO 
-            ax.set_title('Metrics comparison')
-            ax.set_ylabel('Metric')
-            ax.set_xlabel('Cross validation')
-            ax.set_legend([])
-            fig = ax.get_figure()
-            fig.savefig(os.path.join(plot_results, "results_crval", "metrics.png"))
+            raw_metrics = {"accuracy":accuracy, "precision":precision, "recall":recall}
+            for i, metric in enumerate(raw_metrics.values()):
+                plt.bar(x_axis + i*0.3, metric, width=0.3)
+            plt.title('Metrics comparison')
+            plt.ylabel('Metric')
+            plt.xticks(x_axis, [str(x+1) for x in x_axis])
+            plt.legend(list(raw_metrics.keys()))
+            plt.xlabel('Cross validation number')
+            plt.savefig(os.path.join(plot_results, "results_crval", "metrics.png"),dpi=400)
+
+        accuracy = np.mean(accuracy)
+        precision = np.mean(precision)
+        recall = np.mean(recall) 
+        cf_matrix = np.mean(np.array(cf_matrix), axis=0)
 
     return (accuracy, precision, recall), cf_matrix
 
 def plot_data(data, path):
-    
+    if not os.path.exists(path):
+        os.mkdir(path)
     ax = sns.pairplot(data)
-    fig = ax.get_figure()
-    fig.savefig(os.path.join(path, "metadata", "pairplot.png")) 
+    ax.savefig(os.path.join(path, "metadata", "pairplot.png")) 
+    # TODO : algo parecido a esto: ax.close()
 
+def print_metrics(metrics, metric_names=["Accuracy", "Precision", "Recall"]):
+    # Metrics should be of the format acc, pre, recall
+
+    for m, metric in enumerate(metrics):
+        print("{:20s}: {:3.2f}".format(metric_names[m], metric))

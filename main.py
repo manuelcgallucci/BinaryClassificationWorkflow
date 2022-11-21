@@ -31,9 +31,15 @@ def main():
 
         data, labels = wf.import_data(work["data_path"], work["ftr_names"], true_label_str=work["true_label"], dummy_cols=None)
 
-
-        (acc, pr, rec), conf_m = wf.train_model(work["model"], data, labels, work["test_size"], plot_results=work["out_path"], cross_validation=work["cross_validation"])
-
+        wf.plot_data(data, work["out_path"])
+        metrics, _ = wf.train_model(work["model"], data, labels, work["test_size"], plot_results=work["out_path"], cross_validation=work["cross_validation"])
+        
+        if work["cross_validation"] is not None:
+            print("Metrics averaged over {:d} cross validations:".format(work["cross_validation"]))
+        else:
+            print("Metrics:")
+        wf.print_metrics(metrics)
+        
         break
 if __name__ == "__main__":
     main()
