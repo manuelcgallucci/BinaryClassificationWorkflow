@@ -4,20 +4,21 @@ from sklearn.ensemble import RandomForestClassifier
 def main():
     
     BankNotes = {
-        "data_path": ,
+        "data_path": "./data/data_banknote_authentication.txt",
         "ftr_names": ,
-        "out_path": "./",
+        "out_path": "./output/bank_notes",
         "model": RandomForestClassifier(n_estimators=10, max_depth=6),
         "cross_validation": 5,
         "test_size": 0.3,
         "true_label": ( , ),
+        "dummy_cols": None,
     }
     
     ChronicKidney = {
-        "data_path": ,
-        "col_names": ,
-        "ftr_path": ,
-        "model": ,
+        "data_path": "./data/kidney_disease.csv",
+        "ftr_names": [""],
+        "out_path": "./output/chronic_kidney",
+        "model": RandomForestClassifier(n_estimators=10, max_depth=6),
         "cross_validation": 5,
         "test_size": 0.3,
         "true_label": ( , ),

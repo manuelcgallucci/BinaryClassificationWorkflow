@@ -144,7 +144,7 @@ def train_model(model, data, labels, test_size, random_state=42, plot_results=No
         recall = []
         cf_matrix = []
 
-        for train_index, test_index in cross_val.split(X):
+        for train_index, test_index in cross_val.split(data):
             # Copy the model so it can be trained from 0 each time
             model_ = clone(model)
             X_train, X_test, y_train, y_test = data[train_index], data[test_index], labels[train_index], labels[test_index]
