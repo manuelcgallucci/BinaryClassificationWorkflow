@@ -123,7 +123,8 @@ def train_model(model, data, labels, test_size, random_state=42, plot_results=No
     returns the accuracy, precision and recall of the model as a tuple and the confusion matrix
     IF cross validation is used, then these are return in the form of lists
     """
-    print("cross_validation", cross_validation)
+    assert cross_validation >= 1, "Error:Cross validation should be bigger or equal to one"
+    
     if cross_validation is None:
         X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=test_size, random_state=random_state)
         
@@ -141,6 +142,7 @@ def train_model(model, data, labels, test_size, random_state=42, plot_results=No
                 os.mkdir(plot_results)
             if not os.path.exists(os.path.join(plot_results, "results")):
                 os.mkdir(os.path.join(plot_results, "results"))
+            fig, ax = plt.subplots()
             ax = sns.heatmap(cf_matrix, annot=True,cmap='Blues', fmt='g')
             ax.set_title('Confusion Matrix')
             ax.set_ylabel('True values')
@@ -175,6 +177,7 @@ def train_model(model, data, labels, test_size, random_state=42, plot_results=No
             if not os.path.exists(os.path.join(plot_results, "results_crval")):
                 os.mkdir(os.path.join(plot_results, "results_crval"))
             # Plot the mean confusion matrix
+            fig, ax = plt.subplots()
             ax = sns.heatmap(np.mean(np.array(cf_matrix), axis=0), annot=True,cmap='Blues', fmt='g')
             ax.set_title('Mean Confusion Matrix')
             ax.set_ylabel('True values')
@@ -205,12 +208,11 @@ def train_model(model, data, labels, test_size, random_state=42, plot_results=No
 def plot_data(data, path):
     if not os.path.exists(path):
         os.mkdir(path)
+    fig, ax = plt.subplots()
     ax = sns.pairplot(data)
     ax.savefig(os.path.join(path, "metadata", "pairplot.png")) 
-    # TODO : algo parecido a esto: ax.close()
 
 def print_metrics(metrics, metric_names=["Accuracy", "Precision", "Recall"]):
     # Metrics should be of the format acc, pre, recall
-
     for m, metric in enumerate(metrics):
-        print("{:20s}: {:3.2f}".format(metric_names[m], metric))
+        print("\t{:14s}: {:3.2f}".format(metric_names[m], metric))
