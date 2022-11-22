@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 import os 
 
-def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_label="last", dummy_cols=None, replace_nan="mean", random_state=42):
+def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_label="last", dummy_cols=None, replace_nan=True, random_state=42):
     """
     INPUT:
     -   csv_path: path to the data in csv format
@@ -22,7 +22,7 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
     -   true_label_str: tuple of the classification values (true_label,false_label)
     -   normalize: Normalization type for all columns. ("std", "0_1")
     -   dummy_cols: names of the columns to apply dummy variables
-    -   replace_nan: Way to replace nan or missing values. ("mean", "median")
+    -   replace_nan: Way to replace nan or missing values. Mode for ints and Mean for floats 
     OUTPUT: 
     -   data: DataFrame of size (n_samples x n_features) with column names included.
     -   y: DataFrame of size (n_samples x 1) that represents the labels
@@ -41,12 +41,11 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
     X = data.drop(label_to_drop, axis=1)
     y = data[label_to_drop]
 
-    # Fill dummy values with the median
+    # Fill dummy values with the mode
     if dummy_cols is not None:
         for col in dummy_cols: 
-            X[col].fillna(X[col].median(), inplace=True)
+            X[col].fillna(X[col].mode(), inplace=True)
     
-
     # Dummy values 
     # Replaces the column names with dummys 
     X = pd.get_dummies(X, columns=dummy_cols, drop_first=True)
@@ -84,13 +83,15 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
 
     # Dealing with missing values
     # Checking dummy columns to replace nan median
-    if replace_nan == "mean":
+    if replace_nan:
+        # TODO
+        # X column type 
         for col in X.columns:
             X[col].fillna(X[col].mean(), inplace=True)
-    elif replace_nan == "median":
-        for col in X.columns:
-            X[col].fillna(X[col].median(), inplace=True)
-
+    else:
+        # TODO 
+        # Remove nan rows
+        pass
     # Normalizing data
     if normalize == "std":
         X = (X - X.mean()) / X.std()
@@ -102,7 +103,7 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
         # X, y = shuffle(X, y, random_state=random_state)    
         pass
 
-    return X, y
+    return X, y.values
 
 def train_model(model, data, labels, test_size, random_state=42, plot_results=None, cross_validation=None):
     """

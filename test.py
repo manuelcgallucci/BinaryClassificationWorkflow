@@ -19,8 +19,13 @@ class TestSum(unittest.TestCase):
                 correct_label = np.array([1,1,1,1,0])
                 self.assertEqual(data == correct_result, 0)
                 self.assertEqual(label == correct_label, 0)
-        
+
 
 if __name__ == '__main__':
     
-    unittest.main()
+    # unittest.main()
+    data, label = wf.import_data("./data/test/test_data.csv", ["dummy", "int", "float", "label"], 
+        true_label_str=None,normalize=None, class_label="last", dummy_cols=["dummy"], replace_nan="mode")
+
+    print(label)
+    print(data)
