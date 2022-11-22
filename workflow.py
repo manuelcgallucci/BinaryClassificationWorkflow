@@ -55,7 +55,7 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
     if true_label_str is None:
         true_label_str=(np.nan,np.nan)
 
-    # Read data
+    # Read data TODO agregar columnas nombres 
     data = pd.read_csv(csv_path)
 
     # Drop label (classification) column
@@ -65,6 +65,8 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
         label_to_drop = class_label
     X = data.drop(label_to_drop, axis=1).values
     y = data[label_to_drop].values
+
+    # TODO dummy values 
 
     # Remove empty labels
     rows_to_delete = []

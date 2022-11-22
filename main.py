@@ -17,7 +17,7 @@ def main():
     
     # ChronicKidney = dict(
     #     "data_path": "./data/kidney_disease.csv",
-    #     "ftr_names": [""],
+    #     "ftr_names": ["id","age","bp","sg","al","su","rbc","pc","pcc","ba","bgr","bu","sc","sod","pot","hemo","pcv","wc","rc","htn","dm","cad","appet","pe","ane"],
     #     "out_path": "./output/chronic_kidney",
     #     "model": RandomForestClassifier(n_estimators=10, max_depth=6),
     #     "cross_validation": 5,
