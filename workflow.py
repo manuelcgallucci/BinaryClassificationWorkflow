@@ -14,31 +14,7 @@ import matplotlib.pyplot as plt
 
 import os 
 
-# Auxiliar function
-def clean_data(data, replace_nan="mean"):
-    """
-    data: data to be cleaned
-    replace_nan: Way to replace nan or missing values. ("mean", "median", "remove")
-    """
-    if replace_nan == "mean":
-        data = data.fillna(data.mean())
-    elif replace_nan == "median":
-        data = data.fillna(data.median())
-    elif replace_nan == "remove":
-        data = data.dropna()
-
-    # Removing rows with outliers TODO
-    # data = data[(np.abs(Stats.zscore(data)) < 3).all(axis=1)]
-
-    # Normalizing data
-    data = (data - data.mean()) / data.std()
-
-    # Shuffling data
-    data = data.sample(frac=1).reset_index(drop=True)
-
-    return data
-
-def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_label="last", dummy_cols=None, replace_nan="mean"):
+def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_label="last", dummy_cols=None, replace_nan="mean", random_state=42):
     """
     INPUT:
     -   csv_path: path to the data in csv format
@@ -46,8 +22,7 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
     -   true_label_str: tuple of the classification values (true_label,false_label)
     -   normalize: Normalization type for all columns. ("std", "0_1")
     -   dummy_cols: names of the columns to apply dummy variables
-    -   replace_nan: Way to replace nan or missing values. ("mean", "median", "remove")
-
+    -   replace_nan: Way to replace nan or missing values. ("mean", "median")
     OUTPUT: 
     -   data: DataFrame of size (n_samples x n_features) with column names included.
     -   y: DataFrame of size (n_samples x 1) that represents the labels
@@ -57,7 +32,7 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
 
     # Read data TODO agregar columnas nombres 
     data = pd.read_csv(csv_path)
-
+    
     # Drop label (classification) column
     if (class_label=="last"):
         label_to_drop = data.columns[-1]
@@ -67,12 +42,13 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
     y = data[label_to_drop]
 
     # Fill dummy values with the median
-    X = X.fillna(data.median())
-
-    # Call to function clean_data
-    clean_data(X, replace_nan=replace_nan)
+    if dummy_cols is not None:
+        for col in dummy_cols: 
+            X[col].fillna(X[col].median(), inplace=True)
+    
 
     # Dummy values 
+    # Replaces the column names with dummys 
     X = pd.get_dummies(X, columns=dummy_cols, drop_first=True)
 
     # Remove empty labels
@@ -106,7 +82,25 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
     elif isinstance(y[0],bool):
         y = y.astype(int)
 
+    # Dealing with missing values
+    # Checking dummy columns to replace nan median
+    if replace_nan == "mean":
+        for col in X.columns:
+            X[col].fillna(X[col].mean(), inplace=True)
+    elif replace_nan == "median":
+        for col in X.columns:
+            X[col].fillna(X[col].median(), inplace=True)
 
+    # Normalizing data
+    if normalize == "std":
+        X = (X - X.mean()) / X.std()
+    elif normalize == "0_1":
+        X = (X - X.min()) / (X.max() - X.min())
+    
+    # Shuffling data
+    if random_state is not None:
+        # X, y = shuffle(X, y, random_state=random_state)    
+        pass
 
     return X, y
 
