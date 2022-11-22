@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
 from sklearn.model_selection import ShuffleSplit
 from sklearn.base import clone
+from sklearn.utils import shuffle
 
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -100,8 +101,9 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
     
     # Shuffling data
     if random_state is not None:
-        # X, y = shuffle(X, y, random_state=random_state)    
-        pass
+        X, y = shuffle(X, y, random_state=random_state)
+        X.reset_index(drop=True, inplace=True)
+        y.reset_index(drop=True, inplace=True)
 
     return X, y.values
 
