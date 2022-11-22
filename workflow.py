@@ -22,7 +22,7 @@ def clean_data(data, replace_nan="mean"):
     """
     if replace_nan == "mean":
         data = data.fillna(data.mean())
-    elif replace_nan == "median":  
+    elif replace_nan == "median":
         data = data.fillna(data.median())
     elif replace_nan == "remove":
         data = data.dropna()
@@ -63,19 +63,25 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
         label_to_drop = data.columns[-1]
     else:
         label_to_drop = class_label
-    X = data.drop(label_to_drop, axis=1).values
-    y = data[label_to_drop].values
+    X = data.drop(label_to_drop, axis=1)
+    y = data[label_to_drop]
 
-    # TODO dummy values 
+    # Fill dummy values with the median
+    X = X.fillna(data.median())
+
+    # Call to function clean_data
+    clean_data(X, replace_nan=replace_nan)
+
+    # Dummy values 
+    X = pd.get_dummies(X, columns=dummy_cols, drop_first=True)
 
     # Remove empty labels
     rows_to_delete = []
     for i in range(np.size(y)):
         if (y[i]=="" or y[i]==" " or y[i]=='?' or y[i]==np.nan):
             rows_to_delete.append(i)
-    for a in rows_to_delete:
-        y = np.delete(y,a)
-        X = np.delete(X,a, axis=0)
+    y = y.drop(rows_to_delete, axis=0)
+    X = X.drop(rows_to_delete, axis=0)
 
     # Turn labels to integers 0 or 1, supposing every label has a valid value and of the same dtype
     rows_to_delete = []
@@ -89,9 +95,8 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
                     y[i]=0
                 else:
                     rows_to_delete.append(i)
-            for a in rows_to_delete:
-                y = np.delete(y,a)
-                X = np.delete(X,a, axis=0)
+            y = y.drop(rows_to_delete, axis=0)
+            X = X.drop(rows_to_delete, axis=0)
         else:
             # Here we suppose the data was evaluated and there are no missing labels
             y = (y==y[0]).astype(int)
@@ -101,9 +106,7 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
     elif isinstance(y[0],bool):
         y = y.astype(int)
 
-    X = pd.DataFrame(X)
-    # Call to function clean_data
-    clean_data(X, replace_nan=replace_nan)
+
 
     return X, y
 
