@@ -85,14 +85,15 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
     # Dealing with missing values
     # Checking dummy columns to replace nan median
     if replace_nan:
-        # TODO
-        # X column type 
         for col in X.columns:
-            X[col].fillna(X[col].mean(), inplace=True)
+            if X[col].dtype == "int64" or X[col].dtype == "int32":
+                X[col].fillna(X[col].mode(), inplace=True)
+            else:
+                X[col].fillna(X[col].mean(), inplace=True)
     else:
-        # TODO 
-        # Remove nan rows
-        pass
+        # removing rows with nan
+        X = X.dropna(axis=0)
+
     # Normalizing data
     if normalize == "std":
         X = (X - X.mean()) / X.std()
