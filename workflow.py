@@ -128,6 +128,8 @@ def train_model(model, data, labels, test_size, random_state=42, plot_results=No
     """
     assert cross_validation >= 1, "Error:Cross validation should be bigger or equal to one"
     
+    labels = labels.astype(int)
+
     if cross_validation is None:
         X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=test_size, random_state=random_state)
         
@@ -166,6 +168,7 @@ def train_model(model, data, labels, test_size, random_state=42, plot_results=No
             model_ = clone(model)
             X_train, X_test, y_train, y_test = data.iloc[train_index], data.iloc[test_index], labels[train_index], labels[test_index]
             # Fit and predict the model
+
             model_.fit(X_train, y_train)
             y_pred = model_.predict(X_test)
             # Save the parameters of the cross validation
