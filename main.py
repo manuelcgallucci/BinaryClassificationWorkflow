@@ -1,5 +1,8 @@
 import workflow as wf
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
 import os 
 
 def main():
