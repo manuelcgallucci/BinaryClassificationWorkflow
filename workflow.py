@@ -51,13 +51,9 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
     # Replaces the column names with dummys 
     X = pd.get_dummies(X, columns=dummy_cols, drop_first=True)
 
-    # Remove empty labels
-    rows_to_delete = []
-    for i in range(np.size(y)):
-        if (y[i]=="" or y[i]==" " or y[i]=='?' or y[i]==np.nan):
-            rows_to_delete.append(i)
-    y = y.drop(rows_to_delete, axis=0)
-    X = X.drop(rows_to_delete, axis=0)
+    # removinf nan values in y rows
+    y = y[~y.isnull()]
+    X = X.iloc[y.index]
 
     # Turn labels to integers 0 or 1, supposing every label has a valid value and of the same dtype
     rows_to_delete = []
@@ -92,12 +88,8 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
                 X[col].fillna(X[col].mean(), inplace=True)
     else:
         # removing rows with nan from X and corresponding y
-        rows_to_delete = []
-        for i in range(np.size(X)):
-            if (X[i]=="" or X[i]==" " or X[i]=='?' or X[i]==np.nan):
-                rows_to_delete.append(i)
-        y = y.drop(rows_to_delete, axis=0)
-        X = X.drop(rows_to_delete, axis=0)
+        X = X.dropna()
+        y = y.iloc[X.index]
 
     # Normalizing data
     if normalize == "std":
