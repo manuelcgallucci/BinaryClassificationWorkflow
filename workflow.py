@@ -83,16 +83,21 @@ def import_data(csv_path, col_names, true_label_str=None,normalize="std", class_
         y = y.astype(int)
 
     # Dealing with missing values
-    # Checking dummy columns to replace nan median
     if replace_nan:
+        # Checking dummy columns to replace nan median
         for col in X.columns:
             if X[col].dtype == "int64" or X[col].dtype == "int32":
                 X[col].fillna(X[col].mode(), inplace=True)
             else:
                 X[col].fillna(X[col].mean(), inplace=True)
     else:
-        # removing rows with nan
-        X = X.dropna(axis=0)
+        # removing rows with nan from X and corresponding y
+        rows_to_delete = []
+        for i in range(np.size(X)):
+            if (X[i]=="" or X[i]==" " or X[i]=='?' or X[i]==np.nan):
+                rows_to_delete.append(i)
+        y = y.drop(rows_to_delete, axis=0)
+        X = X.drop(rows_to_delete, axis=0)
 
     # Normalizing data
     if normalize == "std":
